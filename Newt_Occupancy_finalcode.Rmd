@@ -209,41 +209,10 @@ library(units)
 HIIcrop2 <- raster("HIIcrop2.tif")
 plot(HIIcrop2)
 
-#shp <- readOGR("condec.shp")
-
-#type <- unique(shp$Deciduous)
-#type_df <- data.frame(ID = 1:length(type), type = type)
-#type_df <- type_df$ID ### 1 is coniferous, 2 is deciduous
-
-
-# Place IDs
-#type$ID <- type_df$ID[match(shp$Deciduous, type_df$Deciduous)] #Skipping because it didnt work
-
-# Define RasterLayer object
-#r.raster <- raster() ### Blank raster
-#values(r.raster)
-
-# Define raster extent to the extent of the shapefile
-#extent(r.raster) <- extent(shp)
-
-# Define pixel size
-#res(r.raster) <- 0.1
-
-# rasterize
-#ras <- rasterize(x = shp, y = r.raster)
-
-#writeRaster(ras, filename = "ras.tiff", options = c('TFW = YES'))
-# ratify raster
 ras <- raster("ras.tif")
 ras <- ratify(ras)
 
-plot(ras, "Deciduous")
-
-#require(raster)
-# Make a raster of the wetlands:
-#shp.r <- rasterize(shp[,"Deciduous"], HIIcrop2)
-#shp.r <- raster(shp.r)
-#writeRaster(shp.r, filename = "shp.r.tif", options=c('TFW=YES'))
+plot(ras)
 
 
 HIIcrop2 <- raster("HIIcrop2.tif")
