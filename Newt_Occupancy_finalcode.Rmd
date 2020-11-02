@@ -192,7 +192,6 @@ library(maptools)
 library(dplyr)
 library(units)
 
-setwd("C:/Users/14842/Documents/Projects")
 
 #HII <- raster("C:/Users/14842/Documents/Projects/HII/hii-n-america-geo-grid/hii-n-america-geo-grid/hii_n_america_grid/hii_n_amer")
 #HII <- projectRaster(HII,crs = crs("+proj=longlat +datum=WGS84 +no_defs"))
@@ -200,42 +199,43 @@ setwd("C:/Users/14842/Documents/Projects")
 #cropbox1 <- drawExtent()
 #HIIcrop1 <- crop(HII, cropbox1)
 
-### Standardize to HII sample
+# Standardize to HII sample
 #HIIcrop2 <- (HIIcrop1-20.74)/9.76
 #plot(HIIcrop2)
 
 # Write a raster layer to pull so you do not need to repeat all of the above steps - above steps are now unecessary, but I left them in case I need to edit
 
 #writeRaster(HIIcrop2, filename = "HIIcrop2.tif", options=c('TFW=YES'))
-HIIcrop2 <- raster("C:/Users/14842/Documents/Projects/HIIcrop2.tif")
+HIIcrop2 <- raster("HIIcrop2.tif")
 plot(HIIcrop2)
 
-shp <- readOGR("C:/Users/14842/Documents/Projects/Exports/condec.shp")
+#shp <- readOGR("condec.shp")
 
-type <- unique(shp$Deciduous)
-type_df <- data.frame(ID = 1:length(type), type = type)
-type_df <- type_df$ID ### 1 is coniferous, 2 is deciduous
+#type <- unique(shp$Deciduous)
+#type_df <- data.frame(ID = 1:length(type), type = type)
+#type_df <- type_df$ID ### 1 is coniferous, 2 is deciduous
 
 
 # Place IDs
 #type$ID <- type_df$ID[match(shp$Deciduous, type_df$Deciduous)] #Skipping because it didnt work
 
 # Define RasterLayer object
-r.raster <- raster() ### Blank raster
-values(r.raster)
+#r.raster <- raster() ### Blank raster
+#values(r.raster)
 
 # Define raster extent to the extent of the shapefile
-extent(r.raster) <- extent(shp)
+#extent(r.raster) <- extent(shp)
 
 # Define pixel size
-res(r.raster) <- 0.1
+#res(r.raster) <- 0.1
 
 # rasterize
-ras <- rasterize(x = shp, y = r.raster)
+#ras <- rasterize(x = shp, y = r.raster)
 
-writeRaster(ras, filename = "ras.tiff", options = c('TFW = YES'))
+#writeRaster(ras, filename = "ras.tiff", options = c('TFW = YES'))
 # ratify raster
-r <- ratify(ras)
+ras <- raster("ras.tif")
+ras <- ratify(ras)
 
 plot(ras, "Deciduous")
 
@@ -246,10 +246,10 @@ plot(ras, "Deciduous")
 #writeRaster(shp.r, filename = "shp.r.tif", options=c('TFW=YES'))
 
 
-HIIcrop2 <- raster("C:/Users/14842/Documents/Projects/HIIcrop2.tif")
+HIIcrop2 <- raster("HIIcrop2.tif")
 plot(HIIcrop2)
 
-shp.r <- raster("C:/Users/14842/Documents/Projects/shp.r.tif") ### This has values taken from HII - no good
+shp.r <- raster("shp.r.tif") ### This has values taken from HII - no good
 hasValues(shp.r)
 plot(shp.r, "Deciduous")
 

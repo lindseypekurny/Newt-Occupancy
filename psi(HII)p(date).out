@@ -1,7 +1,7 @@
 
 
 PRESENCE - Presence/Absence-Site Occupancy data analysis
-Mon Nov 02 10:23:01 2020,       Version 2.13.6.
+Mon Nov 02 10:47:01 2020,       Version 2.13.6.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ==>realbetavc
 ==>maxfn=32000
@@ -5417,9 +5417,9 @@ psi-cond   250  unit250        :   0.4442  0.1113     0.2482 - 0.6591
 psi-cond   251  unit251        :   1.0000  0.0000     0.0000 - 0.0000 
 psi-cond   252  unit252        :   1.0000  0.0000     0.0000 - 0.0000 
 
-CPU time= 0 seconds (0.00 min)
+CPU time= 1 seconds (0.02 min)
 
 
 PRESENCE - Presence/Absence-Site Occupancy data analysis
-Mon Nov 02 10:23:01 2020,       Version 2.13.6.
+Mon Nov 02 10:47:01 2020,       Version 2.13.6.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
