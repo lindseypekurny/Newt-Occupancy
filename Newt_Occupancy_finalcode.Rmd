@@ -1,30 +1,288 @@
 ---
-title: "Untitled"
-author: "Lindsey"
+title: "Newt Occupancy"
+author: "Lindsey Pekurny"
 date: "11/2/2020"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+
+rm(list=ls())
+
+library(RPresence)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+# Counted each dipnet as it's own survey event and each trap as it's own survey event
+# So, each dipnet was own survey, even though it was the same day; same for traps. Attempting to 
+#increase survey visits.
+
+newtdata5 <- read.csv("survknown.csv",skip=1,na.strings="-")
+
+
+dethist5 <- newtdata5[,2:20]
+print(head(dethist5))
+
+
+glimpse(newtdata5)
+tbl_df(newtdata5)
+
+
+Site <- newtdata5[,1]
+str(Site)
+
+date <- newtdata5[,39]
+data <- as.factor(date)
+
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Covariates - Used standardized values
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
 
-```{r cars}
-summary(cars)
+HII <- newtdata5[,24]
+str(HII)
+
+forest <- newtdata5[,28]
+forest <- as.factor(forest)
+str(forest)
+
+dc <- newtdata5[,29]
+dc <- as.factor(dc)
+
+
+wpu<-newtdata5[,32]
+wpu<-as.factor(wpu)
+
+# 2 is VES/Dipnet, 3 is trap
+
+Dipnet <- newtdata5[,2:11]
+Dipnet[Dipnet == "0"|Dipnet =="1"]<-1
+glimpse(Dipnet)
+unique(Dipnet)
+
+
+Traps <- newtdata5[,12:20]
+Traps[Traps=="0"|Traps=="1"]<-2
+glimpse(Traps)
+unique(Traps)
+
+Method=cbind(Dipnet, Traps)
+Method=as.factor(unlist(Method))
+SurveyCov=data.frame(Method)
+
+glimpse(Method)
+unique(Method)
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+newtpao=createPao(data=dethist5,
+                  unitcov=data.frame(HII=HII,forest=forest,dc=dc,wpu=wpu),
+                  survcov=data.frame(Method=Method,date=date),
+                  title="Covariates")
+
+### Occupancy Models
+
+vddc=occMod(data=newtpao,type="so",model=list(psi~dc,p~Method),outfile='modname')
+vdwpu=occMod(data=newtpao,type="so",model=list(psi~wpu,p~Method),outfile='modname')
+vdHII=occMod(data=newtpao,type="so",model=list(psi~HII,p~Method),outfile='modname')
+vdHIIwpu=occMod(data=newtpao,type="so",model=list(psi~HII+wpu,p~Method),outfile='modname')
+vdHIIdc=occMod(data=newtpao,type="so",model=list(psi~HII+dc,p~Method),outfile='modname')
+
+condc=occMod(data=newtpao,type="so",model=list(psi~dc,p~1),outfile='modname')
+conwpu=occMod(data=newtpao,type="so",model=list(psi~wpu,p~1),outfile='modname')
+conHII=occMod(data=newtpao,type="so",model=list(psi~HII,p~1),outfile='modname')
+conHIIwpu=occMod(data=newtpao,type="so",model=list(psi~HII+wpu,p~1),outfile='modname')
+conHIIdc=occMod(data=newtpao,type="so",model=list(psi~HII+dc,p~1),outfile='modname')
+
+datedc=occMod(data=newtpao,type="so",model=list(psi~dc,p~date),outfile='modname')
+datewpu=occMod(data=newtpao,type="so",model=list(psi~wpu,p~date),outfile='modname')
+dateHII=occMod(data=newtpao,type="so",model=list(psi~HII,p~date),outfile='modname')
+dateHIIwpu=occMod(data=newtpao,type="so",model=list(psi~HII+wpu,p~date),outfile='modname')
+dateHIIdc=occMod(data=newtpao,type="so",model=list(psi~HII+dc,p~date),outfile='modname')
+
+trapdatedc=occMod(data=newtpao,type="so",model=list(psi~dc,p~date+Method),outfile='modname')
+trapdatewpu=occMod(data=newtpao,type="so",model=list(psi~wpu,p~date+Method),outfile='modname')
+trapdateHII=occMod(data=newtpao,type="so",model=list(psi~HII,p~date+Method),outfile='modname')
+trapdateHIIwpu=occMod(data=newtpao,type="so",model=list(psi~HII+wpu,p~date+Method),outfile='modname')
+trapdateHIIdc=occMod(data=newtpao,type="so",model=list(psi~HII+dc,p~date+Method),outfile='modname')
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+AICc Table
+
+```{r}
+
+mods=list(condc,conwpu,conHII,conHIIwpu,conHIIdc,vddc,vdwpu,vdHII,vdHIIwpu,vdHIIdc,datedc,datewpu,dateHII,dateHIIwpu,dateHIIdc,trapdatedc,trapdatewpu,trapdateHII,trapdateHIIwpu,trapdateHIIdc)  
+
+results<-createAicTable(mods, use.aicc=TRUE)                      
+print(results$table)
+
+```
+
+
+Visual
+
+```{r}
+
+HIIplot2 <- seq(min(HII, na.rm=T),max(HII, na.rm=T),length.out=100)
+newdata7 = data.frame(HII = HIIplot2, dc=rep(c(0,1), each=100))
+
+HII <- HIIplot2
+dc = (c(0,1))
+
+
+newdata3 <- expand.grid(HII=HII,dc=dc)
+#newdata2<-newdata2[-c(601:800),]
+
+HIIdcpred.psi=predict(vdHIIdc,newdata3,param='psi')
+
+
+HIIdcpred.psi$forest=rep(c("deciduous","conifer"),each=100)
+HIIdcpred.psi$HII=newdata3$HII
+
+ggplot()
+
+a<-
+  ggplot(data=HIIdcpred.psi,aes(x=HII,y=est,fill=as.factor(forest)))+geom_line()+geom_ribbon(aes(ymin=lower_0.95,ymax=upper_0.95, fill=as.factor(forest)),alpha=.5)
+
+a+scale_fill_manual(values = alpha(c("blue","green"), .3))+labs(title = "Forest and HII Effect on N. viridescens Occupancy")+xlab("Human Interference Index")+ylab("Occupancy Estimate")+ labs(fill = "Forest Type")+theme_minimal()
+
+
+# Method Visual
+
+MethMat<-matrix(nrow=2,ncol=4)
+colnames(MethMat)<-c("Method","Detection","Upper","Lower")
+MethMat[1,1]<-"Traps"
+MethMat[2,1]<-"VES Dipnet"
+MethMat[,2]<-unique(vdHIIdc$real$p$est)[2:3]
+MethMat[,3]<-unique(vdHIIdc$real$p$lower_0.95)[2:3]
+MethMat[,4]<-unique(vdHIIdc$real$p$upper_0.95)[2:3]
+MethMat<-as.data.frame(MethMat)
+
+MM<-ggplot(MethMat,aes(Method,Detection))
+MM+geom_col()+geom_errorbar(aes(ymin = Lower, ymax = Upper), width=.5,position=position_dodge(.9))+labs()+theme_minimal()
+
+```
+
+
+Mapping
+
+```{r}
+
+rm(list=ls())
+
+
+library(raster)
+library(sp)
+library(rgdal)
+library(sf)
+library(ggplot2)
+library(broom)
+library(mapview)
+library(leaflet)
+library(plyr)
+library(maptools)
+library(dplyr)
+library(units)
+
+setwd("C:/Users/14842/Documents/Projects")
+
+#HII <- raster("C:/Users/14842/Documents/Projects/HII/hii-n-america-geo-grid/hii-n-america-geo-grid/hii_n_america_grid/hii_n_amer")
+#HII <- projectRaster(HII,crs = crs("+proj=longlat +datum=WGS84 +no_defs"))
+#plot(HII)
+#cropbox1 <- drawExtent()
+#HIIcrop1 <- crop(HII, cropbox1)
+
+### Standardize to HII sample
+#HIIcrop2 <- (HIIcrop1-20.74)/9.76
+#plot(HIIcrop2)
+
+# Write a raster layer to pull so you do not need to repeat all of the above steps - above steps are now unecessary, but I left them in case I need to edit
+
+#writeRaster(HIIcrop2, filename = "HIIcrop2.tif", options=c('TFW=YES'))
+HIIcrop2 <- raster("C:/Users/14842/Documents/Projects/HIIcrop2.tif")
+plot(HIIcrop2)
+
+shp <- readOGR("C:/Users/14842/Documents/Projects/Exports/condec.shp")
+
+type <- unique(shp$Deciduous)
+type_df <- data.frame(ID = 1:length(type), type = type)
+type_df <- type_df$ID ### 1 is coniferous, 2 is deciduous
+
+
+# Place IDs
+#type$ID <- type_df$ID[match(shp$Deciduous, type_df$Deciduous)] #Skipping because it didnt work
+
+# Define RasterLayer object
+r.raster <- raster() ### Blank raster
+values(r.raster)
+
+# Define raster extent to the extent of the shapefile
+extent(r.raster) <- extent(shp)
+
+# Define pixel size
+res(r.raster) <- 0.1
+
+# rasterize
+ras <- rasterize(x = shp, y = r.raster)
+
+writeRaster(ras, filename = "ras.tiff", options = c('TFW = YES'))
+# ratify raster
+r <- ratify(ras)
+
+plot(ras, "Deciduous")
+
+#require(raster)
+# Make a raster of the wetlands:
+#shp.r <- rasterize(shp[,"Deciduous"], HIIcrop2)
+#shp.r <- raster(shp.r)
+#writeRaster(shp.r, filename = "shp.r.tif", options=c('TFW=YES'))
+
+
+HIIcrop2 <- raster("C:/Users/14842/Documents/Projects/HIIcrop2.tif")
+plot(HIIcrop2)
+
+shp.r <- raster("C:/Users/14842/Documents/Projects/shp.r.tif") ### This has values taken from HII - no good
+hasValues(shp.r)
+plot(shp.r, "Deciduous")
+
+#Create HII layer
+maskHII <- mask(HIIcrop2,shp.r)
+plot(maskHII)
+
+join <- raster::stack(ras, maskHII)
+plot(join)  ### Plots ID, not deciduous vs coniferous
+
+
+
+### Stuff that didn't work
+## Trying to select deciduous column from shp.r
+world1 = dplyr::select(shp.r, Deciduous)
+# Trying to subset the Deciduous column
+shp.r$Deciduous
+?extent
+raster::subset(shp.r, "Deciduous")
+NationalParks.Example <- shp.r[shp.r$attributes == "Deciduous",]
+
+```
+
+
+
+
+Updating R
+
+```{r}
+
+install.packages('installr')
+require(installr)
+updateR()
+
+```
+
