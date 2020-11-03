@@ -174,7 +174,8 @@ MM+geom_col()+geom_errorbar(aes(ymin = Lower, ymax = Upper), width=.5,position=p
 
 Mapping
 
-```{r}
+```{r} 
+#map
 
 rm(list=ls())
 
