@@ -191,6 +191,7 @@ library(plyr)
 library(maptools)
 library(dplyr)
 library(units)
+library(rgeos)
 
 
 #HII <- raster("C:/Users/14842/Documents/Projects/HII/hii-n-america-geo-grid/hii-n-america-geo-grid/hii_n_america_grid/hii_n_amer")
@@ -208,6 +209,8 @@ library(units)
 #writeRaster(HIIcrop2, filename = "HIIcrop2.tif", options=c('TFW=YES'))
 HIIcrop2 <- raster("HIIcrop2.tif")
 plot(HIIcrop2)
+
+HIIvec <- rasterToPolygons(HIIcrop2, fun=NULL, n=4, na.rm=TRUE, digits=12, dissolve=TRUE)
 
 ras <- raster("ras.tif")
 ras <- ratify(ras)
