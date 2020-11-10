@@ -121,9 +121,12 @@ AICc Table
 
 mods=list(condc,conwpu,conHII,conHIIwpu,conHIIdc,vddc,vdwpu,vdHII,vdHIIwpu,vdHIIdc,datedc,datewpu,dateHII,dateHIIwpu,dateHIIdc,trapdatedc,trapdatewpu,trapdateHII,trapdateHIIwpu,trapdateHIIdc)  
 
-results<-createAicTable(mods, use.aicc=TRUE)                      
-print(results$table)
+results <- createAicTable(mods, use.aicc=TRUE)                      
+table <- print(results$table)
 
+table <- as.data.frame()
+
+AICcTable <- write.csv(mods,"C:/Users/14842/Documents/test/Newt-Occupancy.csv", row.names = FALSE)
 ```
 
 
@@ -211,9 +214,9 @@ library(rgeos)
 HIIcrop2 <- raster("HIIcrop2.tif")
 plot(HIIcrop2)
 
-HIIvec <- rasterToPolygons(HIIcrop2, fun=NULL, n=4, na.rm=TRUE, digits=12, dissolve=TRUE)
+#HIIvec <- rasterToPolygons(HIIcrop2, fun=NULL, n=4, na.rm=TRUE, digits=12, dissolve=TRUE)
 
-ras <- raster("ras.tif")
+foresttype <- raster("foresttype.tif")
 ras <- ratify(ras)
 
 plot(ras)
